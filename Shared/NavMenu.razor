@@ -1,0 +1,33 @@
+﻿<div class="top-row pl-4 navbar navbar-dark">
+    <a class="navbar-brand" href="">Bài 23 - FORM - NHÂN</a>
+    <button class="navbar-toggler" @onclick="ToggleNavMenu">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+</div>
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+    <ul class="nav flex-column">
+
+        <li class="nav-item px-2">
+            <NavLink class="nav-link" href="/customer-contact">
+                <span class="oi oi-plus" aria-hidden="true"></span> Bài liên hệ khách hàng
+            </NavLink>
+        </li>
+        <li class="nav-item px-2">
+            <NavLink class="nav-link" href="/CourseRegistration">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Bài đăng ký khóa học
+            </NavLink>
+        </li>
+    </ul>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

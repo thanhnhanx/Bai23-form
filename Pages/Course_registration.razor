@@ -1,0 +1,238 @@
+@page "/CourseRegistration"
+<PageTitle>Course Registration Form</PageTitle>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h3 class="text-center mb-4">Course Registration Form</h3>
+                    
+                    <EditForm Model="@courseRegistration" OnValidSubmit="HandleSubmit" OnInvalidSubmit="HandleError">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+                        
+                        <!-- Full Name -->
+                        <div class="mb-3">
+                            <label for="fullname" class="form-label">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="fullname" placeholder="Enter your full name" @bind="@courseRegistration.FullName" />
+                            <ValidationMessage For="@(() => courseRegistration.FullName)" />
+                            @if (!string.IsNullOrEmpty(courseRegistration.FullName) && courseRegistration.FullName.Length < 3)
+                            {
+                                <div class="text-danger small">Full name must be at least 3 characters long.</div>
+                            }
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="email" placeholder="Enter your email" @bind="@courseRegistration.Email" />
+                            <ValidationMessage For="@(() => courseRegistration.Email)" />
+                            @if (!string.IsNullOrEmpty(courseRegistration.Email) && !IsValidEmail(courseRegistration.Email))
+                            {
+                                <div class="text-danger small">Please enter a valid email address.</div>
+                            }
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Phone Number <span class="text-danger">*</span></label>
+                            <input type="tel" class="form-control" id="phone" placeholder="Enter your phone number" @bind="@courseRegistration.PhoneNumber" />
+                            <ValidationMessage For="@(() => courseRegistration.PhoneNumber)" />
+                            @if (!string.IsNullOrEmpty(courseRegistration.PhoneNumber) && !IsValidPhoneNumber(courseRegistration.PhoneNumber))
+                            {
+                                <div class="text-danger small">Phone number must be 10-12 digits.</div>
+                            }
+                        </div>
+
+                        <!-- Select Course -->
+                        <div class="mb-3">
+                            <label for="course" class="form-label">Select Course <span class="text-danger">*</span></label>
+                            <select class="form-control" id="course" @bind="@courseRegistration.SelectedCourse">
+                                <option value="">Choose...</option>
+                                @foreach (var course in availableCourses)
+                                {
+                                    <option value="@course">@course</option>
+                                }
+                            </select>
+                            <ValidationMessage For="@(() => courseRegistration.SelectedCourse)" />
+                            @if (string.IsNullOrEmpty(courseRegistration.SelectedCourse))
+                            {
+                                <div class="text-danger small">Please select a course.</div>
+                            }
+                        </div>
+
+                        <!-- Study Mode -->
+                        <div class="mb-3">
+                            <label class="form-label">Study Mode <span class="text-danger">*</span></label>
+                            <div class="form-check">
+    <input id="online" class="form-check-input" type="radio" name="studyMode" value="Online"
+           checked='@(courseRegistration.StudyMode == "Online")'
+           @onchange='@(() => ChangeStudyMode("Online"))' />
+    <label for="online" class="form-check-label">Online</label>
+</div>
+
+<div class="form-check">
+    <input id="offline" class="form-check-input" type="radio" name="studyMode" value="Offline"
+           checked='@(courseRegistration.StudyMode == "Offline")'
+           @onchange='@(() => ChangeStudyMode("Offline"))' />
+    <label for="offline" class="form-check-label">Offline</label>
+</div>
+
+                            <ValidationMessage For="@(() => courseRegistration.StudyMode)" />
+                        </div>
+
+                        <!-- Preferred Start Date -->
+                        <div class="mb-3">
+                            <label for="startdate" class="form-label">Preferred Start Date <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="startdate" @bind="@courseRegistration.PreferredStartDate" />
+                            <ValidationMessage For="@(() => courseRegistration.PreferredStartDate)" />
+                            @if (courseRegistration.PreferredStartDate < DateTime.Today)
+                            {
+                                <div class="text-danger small">Please select a start date.</div>
+                            }
+                        </div>
+
+                        <!-- Comments or Notes -->
+                        <div class="mb-3">
+                            <label for="comments" class="form-label">Comments or Notes</label>
+                            <textarea class="form-control" id="comments" rows="4" placeholder="Enter any additional information" @bind="@courseRegistration.Comments"></textarea>
+                            <ValidationMessage For="@(() => courseRegistration.Comments)" />
+                        </div>
+
+                        <!-- Terms and Conditions -->
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="terms" @bind="@courseRegistration.AgreeToTerms" />
+                                <label class="form-check-label" for="terms">
+                                    I agree to the terms and conditions <span class="text-danger">*</span> <span class="text-danger small">You must agree before submitting.</span>
+                                </label>
+                            </div>
+                            <ValidationMessage For="@(() => courseRegistration.AgreeToTerms)" />
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-success w-100">Register</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Display Information for Testing -->
+    @if (showSubmittedData)
+    {
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h4>Course Registration Information</h4>
+                        <p><strong>Full Name:</strong> @courseRegistration.FullName</p>
+                        <p><strong>Email:</strong> @courseRegistration.Email</p>
+                        <p><strong>Phone Number:</strong> @courseRegistration.PhoneNumber</p>
+                        <p><strong>Selected Course:</strong> @courseRegistration.SelectedCourse</p>
+                        <p><strong>Study Mode:</strong> @courseRegistration.StudyMode</p>
+                        <p><strong>Preferred Start Date:</strong> @courseRegistration.PreferredStartDate.ToString("dd/MM/yyyy")</p>
+                        <p><strong>Comments:</strong> @(string.IsNullOrEmpty(courseRegistration.Comments) ? "None" : courseRegistration.Comments)</p>
+                        <p><strong>Agreed to Terms:</strong> @(courseRegistration.AgreeToTerms ? "Yes" : "No")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private CourseRegistrationViewModel courseRegistration = new CourseRegistrationViewModel();
+    private bool showSubmittedData = false;
+
+    private List<string> availableCourses = new List<string>()
+    {
+        "C# Programming Fundamentals",
+        "ASP.NET Core Web Development",
+        "Blazor Development",
+        "Entity Framework Core",
+        "JavaScript & TypeScript",
+        "React Development",
+        "Angular Development",
+        "Python Programming",
+        "Machine Learning with Python",
+        "Database Design & SQL",
+        "DevOps & Azure",
+        "Mobile App Development"
+    };
+
+    private void ChangeStudyMode(string studyMode)
+    {
+        courseRegistration.StudyMode = studyMode;
+    }
+
+    private void HandleSubmit()
+    {
+        // Validate all fields before submission
+        if (IsFormValid())
+        {
+            Console.WriteLine("=== Course Registration Submitted Successfully ===");
+            Console.WriteLine($"Full Name: {courseRegistration.FullName}");
+            Console.WriteLine($"Email: {courseRegistration.Email}");
+            Console.WriteLine($"Phone: {courseRegistration.PhoneNumber}");
+            Console.WriteLine($"Course: {courseRegistration.SelectedCourse}");
+            Console.WriteLine($"Study Mode: {courseRegistration.StudyMode}");
+            Console.WriteLine($"Start Date: {courseRegistration.PreferredStartDate:dd/MM/yyyy}");
+            Console.WriteLine($"Comments: {courseRegistration.Comments}");
+            Console.WriteLine($"Terms Agreed: {courseRegistration.AgreeToTerms}");
+            
+            showSubmittedData = true;
+            StateHasChanged();
+        }
+        else
+        {
+            Console.WriteLine("Form validation failed");
+            HandleError();
+        }
+    }
+
+    private void HandleError()
+    {
+        Console.WriteLine("Có lỗi xảy ra trong quá trình đăng ký khóa học");
+        showSubmittedData = false;
+    }
+
+    private bool IsFormValid()
+    {
+        return !string.IsNullOrEmpty(courseRegistration.FullName) && courseRegistration.FullName.Length >= 3 &&
+               !string.IsNullOrEmpty(courseRegistration.Email) && IsValidEmail(courseRegistration.Email) &&
+               !string.IsNullOrEmpty(courseRegistration.PhoneNumber) && IsValidPhoneNumber(courseRegistration.PhoneNumber) &&
+               !string.IsNullOrEmpty(courseRegistration.SelectedCourse) &&
+               !string.IsNullOrEmpty(courseRegistration.StudyMode) &&
+               courseRegistration.PreferredStartDate >= DateTime.Today &&
+               courseRegistration.AgreeToTerms;
+    }
+
+    private bool IsValidEmail(string email)
+    {
+        try
+        {
+            var addr = new System.Net.Mail.MailAddress(email);
+            return addr.Address == email;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private bool IsValidPhoneNumber(string phoneNumber)
+    {
+        if (string.IsNullOrEmpty(phoneNumber))
+            return false;
+            
+        // Remove all non-digit characters
+        var digitsOnly = new string(phoneNumber.Where(char.IsDigit).ToArray());
+        return digitsOnly.Length >= 10 && digitsOnly.Length <= 12;
+    }
+
+
+}

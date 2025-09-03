@@ -1,0 +1,207 @@
+@page "/customer-contact"
+<PageTitle>Customer Contact Form</PageTitle>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h3 class="text-center mb-4">Customer Contact Form</h3>
+                    
+                    <EditForm Model="@contactForm" OnValidSubmit="HandleSubmit" OnInvalidSubmit="HandleError">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+                        
+                        <!-- Full Name -->
+                        <div class="mb-3">
+                            <label for="fullname" class="form-label">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="fullname" placeholder="Enter your full name" @bind="@contactForm.FullName" />
+                            <ValidationMessage For="@(() => contactForm.FullName)" />
+                            @if (!string.IsNullOrEmpty(contactForm.FullName) && contactForm.FullName.Length < 3)
+                            {
+                                <div class="text-danger small">Full name must be at least 3 characters long.</div>
+                            }
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="email" placeholder="Enter your email" @bind="@contactForm.Email" />
+                            <ValidationMessage For="@(() => contactForm.Email)" />
+                            @if (!string.IsNullOrEmpty(contactForm.Email) && !IsValidEmail(contactForm.Email))
+                            {
+                                <div class="text-danger small">Please enter a valid email address.</div>
+                            }
+                        </div>
+
+                        <!-- Phone Number -->
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Phone Number <span class="text-danger">*</span></label>
+                            <input type="tel" class="form-control" id="phone" placeholder="Enter your phone number" @bind="@contactForm.PhoneNumber" />
+                            <ValidationMessage For="@(() => contactForm.PhoneNumber)" />
+                            @if (!string.IsNullOrEmpty(contactForm.PhoneNumber) && !IsValidPhoneNumber(contactForm.PhoneNumber))
+                            {
+                                <div class="text-danger small">Phone number must be 10-12 digits.</div>
+                            }
+                        </div>
+
+                        <!-- Address -->
+                        <div class="mb-3">
+                            <label for="address" class="form-label">Address</label>
+                            <input type="text" class="form-control" id="address" placeholder="Enter your address" @bind="@contactForm.Address" />
+                            <ValidationMessage For="@(() => contactForm.Address)" />
+                        </div>
+
+                        <!-- Message -->
+                        <div class="mb-3">
+                            <label for="message" class="form-label">Message <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="message" rows="4" placeholder="Enter your message" @bind="@contactForm.Message"></textarea>
+                            <ValidationMessage For="@(() => contactForm.Message)" />
+                            @if (!string.IsNullOrEmpty(contactForm.Message) && contactForm.Message.Length < 10)
+                            {
+                                <div class="text-danger small">Message must be at least 10 characters long.</div>
+                            }
+                        </div>
+
+                        <!-- Select Service -->
+                        <div class="mb-3">
+                            <label for="service" class="form-label">Select Service <span class="text-danger">*</span></label>
+                            <select class="form-control" id="service" @bind="@contactForm.SelectedService">
+                                <option value="">Choose...</option>
+                                @foreach (var service in availableServices)
+                                {
+                                    <option value="@service">@service</option>
+                                }
+                            </select>
+                            <ValidationMessage For="@(() => contactForm.SelectedService)" />
+                            @if (string.IsNullOrEmpty(contactForm.SelectedService))
+                            {
+                                <div class="text-danger small">Please select a service.</div>
+                            }
+                        </div>
+
+                        <!-- Terms and Conditions -->
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="terms" @bind="@contactForm.AgreeToTerms" />
+                                <label class="form-check-label" for="terms">
+                                    I agree to the terms and conditions <span class="text-danger">*</span> <span class="text-danger small">You must agree before submitting.</span>
+                                </label>
+                            </div>
+                            <ValidationMessage For="@(() => contactForm.AgreeToTerms)" />
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="mb-3">
+                            <button type="submit" class="btn btn-primary w-100">Submit</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Display Information for Testing -->
+    @if (showSubmittedData)
+    {
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h4>Submitted Information</h4>
+                        <p><strong>Full Name:</strong> @contactForm.FullName</p>
+                        <p><strong>Email:</strong> @contactForm.Email</p>
+                        <p><strong>Phone Number:</strong> @contactForm.PhoneNumber</p>
+                        <p><strong>Address:</strong> @contactForm.Address</p>
+                        <p><strong>Message:</strong> @contactForm.Message</p>
+                        <p><strong>Selected Service:</strong> @contactForm.SelectedService</p>
+                        <p><strong>Agreed to Terms:</strong> @(contactForm.AgreeToTerms ? "Yes" : "No")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private CustomerContactViewModel contactForm = new CustomerContactViewModel();
+    private bool showSubmittedData = false;
+
+    private List<string> availableServices = new List<string>()
+    {
+        "Web Development",
+        "Mobile App Development",
+        "Digital Marketing",
+        "SEO Services",
+        "Graphic Design",
+        "IT Consulting",
+        "E-commerce Solutions",
+        "Cloud Services"
+    };
+
+    private void HandleSubmit()
+    {
+        // Validate all fields before submission
+        if (IsFormValid())
+        {
+            Console.WriteLine("=== Form Submitted Successfully ===");
+            Console.WriteLine($"Full Name: {contactForm.FullName}");
+            Console.WriteLine($"Email: {contactForm.Email}");
+            Console.WriteLine($"Phone: {contactForm.PhoneNumber}");
+            Console.WriteLine($"Address: {contactForm.Address}");
+            Console.WriteLine($"Message: {contactForm.Message}");
+            Console.WriteLine($"Service: {contactForm.SelectedService}");
+            Console.WriteLine($"Terms Agreed: {contactForm.AgreeToTerms}");
+            
+            showSubmittedData = true;
+            StateHasChanged();
+        }
+        else
+        {
+            Console.WriteLine("Form validation failed");
+            HandleError();
+        }
+    }
+
+    private void HandleError()
+    {
+        Console.WriteLine("Có lỗi xảy ra trong quá trình gửi form");
+        showSubmittedData = false;
+    }
+
+    private bool IsFormValid()
+    {
+        return !string.IsNullOrEmpty(contactForm.FullName) && contactForm.FullName.Length >= 3 &&
+               !string.IsNullOrEmpty(contactForm.Email) && IsValidEmail(contactForm.Email) &&
+               !string.IsNullOrEmpty(contactForm.PhoneNumber) && IsValidPhoneNumber(contactForm.PhoneNumber) &&
+               (string.IsNullOrEmpty(contactForm.Address) || contactForm.Address.Length >= 5) &&
+               !string.IsNullOrEmpty(contactForm.Message) && contactForm.Message.Length >= 10 &&
+               !string.IsNullOrEmpty(contactForm.SelectedService) &&
+               contactForm.AgreeToTerms;
+    }
+
+    private bool IsValidEmail(string email)
+    {
+        try
+        {
+            var addr = new System.Net.Mail.MailAddress(email);
+            return addr.Address == email;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private bool IsValidPhoneNumber(string phoneNumber)
+    {
+        if (string.IsNullOrEmpty(phoneNumber))
+            return false;
+            
+        // Remove all non-digit characters
+        var digitsOnly = new string(phoneNumber.Where(char.IsDigit).ToArray());
+        return digitsOnly.Length >= 10 && digitsOnly.Length <= 12;
+    }
+
+
+}
